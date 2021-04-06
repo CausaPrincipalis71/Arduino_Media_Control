@@ -57,6 +57,16 @@ class Mouse                                                     // Класс у
             system("xdotool click 1");                          // Вызов xdotools с командой одного нажатия мышью
         }
 
+        void faster()                                           // Увеличения шага
+        {
+            step += 2;
+        }
+
+        void slower()                                           // Уменьшение
+        {
+            step -= 2;
+        }
+
         /* Геттеры, не используются*/
         int getMouseX()
         {
@@ -69,7 +79,7 @@ class Mouse                                                     // Класс у
     private:
         int mouseX, mouseY;                                     // Координаты
 
-        const int step = 25;                                    // Шаг в пикселяъ
+        int step = 25;                                          // Шаг в пикселях
 
         QString getMouseLocation()                              // Получение строки с положением мыши
         {
@@ -102,6 +112,22 @@ class Mouse                                                     // Класс у
         }
 };
 
+class Keyboard
+{
+    public:
+        void up()
+        {
+            system(QString("xdotool key --repeat " + QString::number(amount) + " Up").toStdString().c_str());
+        }
+        void down()
+        {
+            system(QString("xdotool key --repeat " + QString::number(amount) + " Down").toStdString().c_str());
+        }
+
+    private:
+        int amount = 5;
+};
+
 class programm : public QObject
 {
     Q_OBJECT
@@ -123,12 +149,16 @@ class programm : public QObject
         {
             auto message = Serial.readAll();                                                                // Чтение данных
             /*
-            ОПИСАНИЕ СИГНАЛОВ
-            1 - МЫШЬ ВВЕРХ
-            2 - МЫШЬ ВНИЗ
-            3 - МЫШЬ ВПРАВО
-            4 - МЫШЬ ВЛЕВО
-            5 - ЛКМ
+                  ОБОЗНАЧЕНИЕ КОМАНД
+                  1 - МЫШЬ ВВЕРХ
+                  2 - МЫШЬ ВНИЗ
+                  3 - МЫШЬ ВПРАВО
+                  4 - МЫШЬ ВЛЕВО
+                  5 - ЛКМ
+                  6 - СТРЕЛКА ВВЕРХ
+                  7 - СТРЕЛКА ВНИЗ
+                  8 - УМЕНЬШИТЬ СКОРОСТЬ МЫШИ
+                  9 - УВЕЛИЧИТЬ СКОРОСТЬ МЫШИ
             */
             if(message.contains("1"))
             {
@@ -146,15 +176,31 @@ class programm : public QObject
             {
                 mouse.left();
             }
-
             if(message.contains("5"))
             {
                 mouse.leftMouseClick();
+            }
+            if(message.contains("6"))
+            {
+                keyboard.up();
+            }
+            if(message.contains("7"))
+            {
+                keyboard.down();
+            }
+            if(message.contains("8"))
+            {
+                mouse.slower();
+            }
+            if(message.contains("9"))
+            {
+                mouse.faster();
             }
         }
     private:
         QSerialPort Serial;
         Mouse mouse;
+        Keyboard keyboard;
 };
 
 #include "main.moc"
